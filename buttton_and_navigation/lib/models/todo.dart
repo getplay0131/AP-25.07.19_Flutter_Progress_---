@@ -4,7 +4,7 @@ class Todo {
   final String id;
   final String title;
   final String category;
-  final String priority;
+  String priority;
   bool isCompleted;
 
   Todo({
