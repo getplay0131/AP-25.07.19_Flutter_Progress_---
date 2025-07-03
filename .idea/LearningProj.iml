@@ -15,6 +15,9 @@
       <excludeFolder url="file://$MODULE_DIR$/date_250624/random_number_generator_self/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/date_250624/random_number_generator_self/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/date_250624/random_number_generator_self/build" />
+      <excludeFolder url="file://$MODULE_DIR$/buttton_and_navigation_design_imp/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/buttton_and_navigation_design_imp/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/buttton_and_navigation_design_imp/build" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

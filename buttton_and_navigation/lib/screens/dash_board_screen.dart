@@ -1,3 +1,4 @@
+import 'package:buttton_and_navigation/screens/setting_screen.dart';
 import 'package:buttton_and_navigation/screens/todo_list_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -79,6 +80,13 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                   // 테두리만 있는 버튼
                   onPressed: () {
                     print("설정 버튼 클릭됨!");
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) {
+                          return SettingScreen(isModeChange: false);
+                        },
+                      ),
+                    );
                   },
                   child: Text("설정"), // 버튼의 내용
                 ),

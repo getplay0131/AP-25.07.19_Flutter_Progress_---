@@ -65,7 +65,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
           final pushed = await Navigator.of(context).push(
             MaterialPageRoute(
               builder: (BuildContext context) {
-                return AddTodoScreen(category: "오후", priority: "medium");
+                return AddTodoScreen(category: "오후", priority: "중간");
               },
             ),
           );
@@ -199,7 +199,6 @@ class priorityBtn extends StatefulWidget {
   // 생성자 통해 값 초기화
   priorityBtn({super.key, required this.priority, required this.onPress});
 
-
   @override
   State<priorityBtn> createState() => _priorityBtnState();
 }
@@ -212,14 +211,13 @@ class _priorityBtnState extends State<priorityBtn> {
 
   @override
   Widget build(BuildContext context) {
-    const String high = "high"; // 범용적 사용을 위해 스태틱 사용 및 콘스트로 값 변경 방지
+    const String high = "높음"; // 범용적 사용을 위해 스태틱 사용 및 콘스트로 값 변경 방지
 
-    const String medium = "medium";
+    const String medium = "중간";
 
-    const String low = "low";
+    const String low = "낮음";
 
     print("우선순위: ${widget.priority}");
-    print(widget.onPress);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround, // 버튼 사이 간격 조정
       // 가로 배치
