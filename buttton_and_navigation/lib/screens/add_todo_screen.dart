@@ -6,7 +6,7 @@ class AddTodoScreen extends StatefulWidget {
   String category;
   String priority;
 
-  AddTodoScreen({Key? key, required this.category, required this.priority})
+  AddTodoScreen({Key? key, required this.category, required this.priority}) // 생성자를 통한 초기화
     : super(key: key);
 
   @override
@@ -19,7 +19,7 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
 
   static String todoId = "todoId"; // 공유를 위해 스태틱 사용
 
-  static int todoIndex = 0;
+  static int todoIndex = 0; // 고유한 아이디 생성을 위한 인덱스 값
 
   String get title => _titleController.text; // 텍스트 내용 반환하는 게터 함수
   @override
@@ -67,10 +67,10 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
               ),
             ),
             choiceCategory(
-              category: widget.category,
+              category: widget.category, // 상위 클래스의 요소 사용
               onPress: (changeCategory) {
                 // 사용하는 곳에 값을 반영하기 위해, 함수를 사용하여 셋 스테이트 사용
-                setState(() {
+                setState(() { // 빌드 재실행
                   widget.category = changeCategory; // 신규값 기존 값에 저장
                 });
                 print(widget.category); // 디버깅용 코드
@@ -111,7 +111,7 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
       );
 
       print("생성된 Todo: ${todo.title}, ${todo.category}, ${todo.priority}");
-      Navigator.of(context).pop(todo); // 이전 화면으로 돌아가기
+      Navigator.of(context).pop(todo); // 이전 화면으로 돌아가기 , 해당 객체를 전달해야 저장을 한다, 물론 비워놔도 뒤로가기 기능은 있다.
     } else {
       print("❌ 폼 검증 실패!");
     }
@@ -170,7 +170,7 @@ class _choiceCategoryState extends State<choiceCategory> {
             // 세로배치 => 아이콘과 텍스트 새로 배치
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Padding(
+              Padding( // 내부 여벽 설정
                 padding: const EdgeInsets.all(8.0),
                 child: Icon(Icons.bed),
               ),
@@ -246,14 +246,14 @@ class _priorityBtnsState extends State<priorityBtns> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        ElevatedButton(
+        ElevatedButton( // 버튼 강조하는 위젯
           style: ElevatedButton.styleFrom(
             backgroundColor: Theme.of(
-              context,
+              context, // 배경색
             ).colorScheme.error, // 테마를 사용하는 플러터의 최신 디자인 문법
-            foregroundColor: Theme.of(context).colorScheme.onError,
-            disabledBackgroundColor: Colors.grey,
-            disabledForegroundColor: Colors.black,
+            foregroundColor: Theme.of(context).colorScheme.onError, // 내부 콘텐츠 색상
+            disabledBackgroundColor: Colors.grey, // 비활성화시 배경색
+            disabledForegroundColor: Colors.black, // 비활성화시 내부 콘텐츠 색상
           ),
           onPressed: () {
             print("우선순위 높음 버튼 클릭 됨");
