@@ -2,11 +2,13 @@ import 'package:buttton_and_navigation/models/todo.dart';
 import 'package:buttton_and_navigation/screens/todo_list_screen.dart';
 import 'package:flutter/material.dart';
 
+// ⭐️ AddTodoScreen: 할 일 추가 화면, category와 priority를 생성자로 받음
+// - StatefulWidget: 화면 내 상태(입력값, 선택값 등)가 바뀔 수 있으므로 사용
 class AddTodoScreen extends StatefulWidget {
-  String category;
-  String priority;
+  String category; // ⭐️ 부모에서 전달받은 카테고리(아침/오후/저녁)
+  String priority; // ⭐️ 부모에서 전달받은 우선순위(높음/중간/낮음)
 
-  AddTodoScreen({Key? key, required this.category, required this.priority}) // 생성자를 통한 초기화
+  AddTodoScreen({Key? key, required this.category, required this.priority})
     : super(key: key);
 
   @override
@@ -14,28 +16,34 @@ class AddTodoScreen extends StatefulWidget {
 }
 
 class _AddTodoScreenState extends State<AddTodoScreen> {
-  final TextEditingController _titleController =
-      TextEditingController(); // 텍스트 입력을 관리하는 컨트롤러이다.
+  // ⭐️ TextEditingController: TextFormField의 입력값을 실시간으로 읽고, 초기화/해제 관리
+  final TextEditingController _titleController = TextEditingController();
 
-  static String todoId = "todoId"; // 공유를 위해 스태틱 사용
+  // ⭐️ static 변수: 여러 인스턴스에서 공유, 고유 id 생성을 위해 사용 (동시성 이슈 주의)
+  static String todoId = "todoId";
+  static int todoIndex = 0;
 
-  static int todoIndex = 0; // 고유한 아이디 생성을 위한 인덱스 값
+  // ⭐️ 입력된 텍스트 반환 (getter)
+  String get title => _titleController.text;
 
-  String get title => _titleController.text; // 텍스트 내용 반환하는 게터 함수
   @override
   Widget build(BuildContext context) {
-    final _formKey = GlobalKey<FormState>(); // 폼 검증을 위한 키
+    // ⭐️ GlobalKey<FormState>: 폼 검증을 위한 키, Form 위젯과 연결
+    final _formKey = GlobalKey<FormState>();
+    final arguments =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final String mode = arguments?['mode'] ?? 'view'; // ⭐️ 모드 설정 (기본값: 'view')
+    final Map<String, dynamic> profileData =
+        arguments?['profileData'] ??
+        {"id": "defaultId", "name": "defaultName", "email": "defaultEmail"};
 
     return Scaffold(
-      // 기본 레이아웃 제공 위젯
       appBar: AppBar(
-        // 앱바 위젯
-        title: Text("할일 추가"),
+        title: Text(mode == "edit" ? "할일 수정" : "할일 추가"),
         actions: [
           IconButton(
-            // 아이콘을 내용으로 사용하는 버튼
             onPressed: () {
-              _saveToDo(_formKey); // 클릭시 투두 저장하며, 키는 폼 필드를 관리하는 키를 사용한다.
+              _saveToDo(_formKey); // ⭐️ 저장 함수 호출
               print("savetodo 함수 호출하여 저장!");
             },
             icon: Icon(Icons.save),
@@ -43,42 +51,43 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
         ],
       ),
       body: Form(
-        // 폼 위젯은 입력 폼 관리
-        key: _formKey, // 키는 반드시 기재해야한다.
+        key: _formKey,
         child: Column(
-          // 세로 배치
-          mainAxisAlignment: MainAxisAlignment.spaceAround, // 균등 배치
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
+            // ⭐️ TextFormField: 사용자 입력을 받는 위젯
+            // - controller로 입력값을 실시간 관리
+            // - validator로 입력값 검증 (폼 제출 시 유효성 체크)
+            // - decoration으로 힌트, 라벨, 테두리 등 UI 설정
+            // [주의] Column 등 레이아웃에 중첩될 때 스크롤이 필요하면 SingleChildScrollView로 감싸야 함
             TextFormField(
-              // 입력 창 위젯
-              controller: _titleController, // 컨트롤러 명시 필요
+              controller:
+                  _titleController, // ⭐️ 입력값을 관리하는 TextEditingController
               validator: (value) {
-                // 값 검증 파라미터
                 if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
+                  return 'Please enter some text'; // ⭐️ 입력값이 없으면 에러 메시지 반환
                 }
                 return null;
               },
               decoration: InputDecoration(
-                // 인풋 데코레이션은 데코레이션 파라미터에 사용해야한다.
-                hintText: "할일을 입력해주세요!", // 텍스트 위젯이 아닌 바로 문자열 사용
+                hintText: "할일을 입력해주세요!",
                 labelText: "제목",
-                border: OutlineInputBorder(), // 보더 위젯 사용
+                border: OutlineInputBorder(),
               ),
             ),
+            // ⭐️ 카테고리 선택 위젯: 파라미터로 전달된 category 값이 변경될 때 setState로 반드시 갱신해야 UI에 반영됨
             choiceCategory(
-              category: widget.category, // 상위 클래스의 요소 사용
+              category: widget.category,
               onPress: (changeCategory) {
-                // 사용하는 곳에 값을 반영하기 위해, 함수를 사용하여 셋 스테이트 사용
-                setState(() { // 빌드 재실행
-                  widget.category = changeCategory; // 신규값 기존 값에 저장
+                setState(() {
+                  widget.category = changeCategory;
                 });
-                print(widget.category); // 디버깅용 코드
+                print(widget.category);
               },
             ),
+            // ⭐️ 우선순위 선택 버튼: 파라미터 값이 자식 위젯에서 변경될 때, 부모의 상태도 반드시 갱신해야 함
             priorityBtns(
-              // 우선순위 변경 버튼
-              priority: widget.priority, // 우선순위 전달
+              priority: widget.priority,
               onPress: (changePriority) {
                 setState(() {
                   widget.priority = changePriority;
@@ -92,7 +101,8 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
     );
   }
 
-  // ✅ add_todo_screen.dart의 _saveToDo에 추가
+  // ⭐️ 할 일 저장 함수: 폼 검증 후 Todo 객체 생성 및 이전 화면으로 전달
+  // - Navigator.of(context).pop(todo): 이전 화면으로 객체 전달 (push로 이동한 화면에서만 사용)
   void _saveToDo(GlobalKey<FormState> key) {
     print("=== 저장 시작 ===");
     print("제목: '$title'");
@@ -102,41 +112,63 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
     if (key.currentState?.validate() == true) {
       print("✅ 폼 검증 통과!");
 
+      if(widget.category.isEmpty){
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("카테고리를 선택해주세요!"), backgroundColor: Colors.orange,),);
+      print("카테고리 선택 안됨!");
+        return;
+      }
+
+      if(widget.priority.isEmpty){
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("우선순위 선택해주세요!"), backgroundColor: Colors.orange,),);
+        print("우선순위 선택 안됨!");
+        return;
+      }
+
+      print("✅ 모든 검증 통과!");
+
       var todo = Todo(
-        id: createToDoId(todoId, todoIndex), // 생성한 아이디를 값으로 사용
-        title: title, // 입력받은  값을 타이틀로 사용
+        id: createToDoId(todoId, todoIndex),
+        title: title,
         category: widget.category,
         priority: widget.priority,
-        isCompleted: false, // 기본으로 미 완성으로 간주
+        isCompleted: false,
       );
 
-      print("생성된 Todo: ${todo.title}, ${todo.category}, ${todo.priority}");
-      Navigator.of(context).pop(todo); // 이전 화면으로 돌아가기 , 해당 객체를 전달해야 저장을 한다, 물론 비워놔도 뒤로가기 기능은 있다.
+      print("📝 Todo 생성 완료:");
+      print("- ID: ${todo.id}");
+      print("- 제목: ${todo.title}");
+      print("- 카테고리: ${todo.category}");
+      print("- 우선순위: ${todo.priority}");
+
+      // ⭐️ pop으로 Todo 객체 전달 (이전 화면에서 받을 수 있음)
+
+        Navigator.of(context).pop(todo);
+      print("🚀 할일 데이터 반환 완료!");
     } else {
       print("❌ 폼 검증 실패!");
     }
   }
 
-  // 아이디 생성 함수, 아이디와 인덱스를 받아서 아이디를 생성해서 반환한다.
+  // ⭐️ 고유 id 생성 함수: static 변수 활용, 반드시 인덱스 증가 필요
   String createToDoId(String id, int idx) {
-    todoIndex++; // 고유값을 위해 인덱스 증가
+    todoIndex++;
     return id + idx.toString();
   }
 
-  // 메모리 관리를 위해 컨트롤러 종료
+  // ⭐️ 컨트롤러 해제 (메모리 누수 방지)
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     _titleController.dispose();
   }
 }
 
-// 상태 변화를 위해 스테이트 풀 위젯 사용
+// ⭐️ 카테고리 선택 위젯: 아침/오후/저녁 선택, 선택 시 onPress 콜백 호출
+// - 상태 변경 시 setState로 UI 갱신
 class choiceCategory extends StatefulWidget {
   String category;
+  final Function(String) onPress;
 
-  final Function(String) onPress; // 사용하는 곳에서 값 변경을 위해 함수 사용
   choiceCategory({Key? key, required this.category, required this.onPress})
     : super(key: key);
 
@@ -148,29 +180,24 @@ class _choiceCategoryState extends State<choiceCategory> {
   @override
   Widget build(BuildContext context) {
     return Row(
-      // 익스펜드는 무조건 공간을 다 사용하므로, 필요에 따라 익스펜드 사용하며 가로로 배치
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         OutlinedButton(
-          // 테두리 있는 버튼
           style: OutlinedButton.styleFrom(
-            // 버튼 스타일은 이와 같이 사용
-            shape: CircleBorder(eccentricity: 0.8), // 테두리 관련 설정
+            shape: CircleBorder(eccentricity: 0.8),
             disabledBackgroundColor: Colors.grey,
             backgroundColor: Colors.yellow,
           ),
           onPressed: () {
-            // 클릭시
             print("아침 버튼 클릭 됨");
             setState(() {
-              widget.onPress("아침"); // 상위 클래스에 해당 함수에 해당 값을 전달
+              widget.onPress("아침");
             });
           },
           child: Column(
-            // 세로배치 => 아이콘과 텍스트 새로 배치
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Padding( // 내부 여벽 설정
+              Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Icon(Icons.bed),
               ),
@@ -229,10 +256,11 @@ class _choiceCategoryState extends State<choiceCategory> {
   }
 }
 
+// ⭐️ 우선순위 선택 버튼 위젯: 높음/중간/낮음 선택, 선택 시 onPress 콜백 호출
+// - 상태 변경 시 setState로 UI 갱신
 class priorityBtns extends StatefulWidget {
   String priority;
-
-  final Function(String) onPress; // 사용하는 곳에서의 값 변경을 위해 함수 사용
+  final Function(String) onPress;
 
   priorityBtns({super.key, required this.priority, required this.onPress});
 
@@ -246,14 +274,12 @@ class _priorityBtnsState extends State<priorityBtns> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        ElevatedButton( // 버튼 강조하는 위젯
+        ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Theme.of(
-              context, // 배경색
-            ).colorScheme.error, // 테마를 사용하는 플러터의 최신 디자인 문법
-            foregroundColor: Theme.of(context).colorScheme.onError, // 내부 콘텐츠 색상
-            disabledBackgroundColor: Colors.grey, // 비활성화시 배경색
-            disabledForegroundColor: Colors.black, // 비활성화시 내부 콘텐츠 색상
+            backgroundColor: Theme.of(context).colorScheme.error,
+            foregroundColor: Theme.of(context).colorScheme.onError,
+            disabledBackgroundColor: Colors.grey,
+            disabledForegroundColor: Colors.black,
           ),
           onPressed: () {
             print("우선순위 높음 버튼 클릭 됨");
@@ -298,6 +324,7 @@ class _priorityBtnsState extends State<priorityBtns> {
   }
 }
 
+// ⭐️ 디버깅용
 main() {
   runApp(
     MaterialApp(
@@ -306,3 +333,16 @@ main() {
     ),
   );
 }
+
+/*
+[초급자를 위한 핵심 및 주의점]
+- ⭐️ static 변수는 인스턴스 간 값 공유, id 생성에 적합하지만 동시성 이슈에 주의
+- ⭐️ Form과 GlobalKey는 폼 검증에 필수, 키를 반드시 연결해야 함
+- ⭐️ Navigator.pop으로 객체 전달 시, 이전 화면에서 받을 수 있음 (push로 이동한 경우만)
+- ⭐️ 컨트롤러는 dispose에서 해제 (메모리 누수 방지)
+- ⭐️ setState는 UI 갱신에 필수, 값 변경 시 반드시 호출
+- ⭐️ 위젯의 상태(카테고리, 우선순위)는 부모에서 관리, 콜백으로 자식에서 변경
+- ⭐️ TextFormField는 controller로 입력값을 관리하고, validator로 유효성 검증
+- ⭐️ Column, Row 등 레이아웃 중첩이 많아지면 성능 저하 및 UI 깨짐에 주의 (특히 스크롤 필요시 SingleChildScrollView 등 사용)
+- ⭐️ 파라미터로 전달된 값이 null이거나 예상치 못한 값일 때 예외 처리 필요
+*/
