@@ -173,7 +173,10 @@ class _SettingScreenState extends State<SettingScreen> {
                 //     },
                 //   ),
                 // );
-                Navigator.of(context).pop();
+                // Navigator.of(context).pop();
+                Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil("/dashBoardScreen", (route) => false);
               },
               child: Icon(Icons.home),
             ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class Todo {
   final String id;
-  final String title;
+  String title;
   final String category;
   String priority;
   bool isCompleted;

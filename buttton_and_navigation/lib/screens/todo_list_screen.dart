@@ -10,10 +10,15 @@ class TodoListScreen extends StatefulWidget {
   final List<Todo> todos; // 할일 목록을 저장하는 리스트
   final Function(Todo) onAddedToDo; // 할일 추가 콜백
 
-  const TodoListScreen({
+  late String mode; // 화면 모드 (예: "view", "edit")
+
+  TextEditingController _titleController = TextEditingController();
+
+  TodoListScreen({
     Key? key,
     required this.todos,
     required this.onAddedToDo,
+    this.mode = "view", // 기본 모드는 "view"
   }) : super(key: key); // 생성자에서 리스트 초기화
 
   @override
@@ -32,7 +37,9 @@ class _TodoListScreenState extends State<TodoListScreen> {
     print("📋 [TodoListScreen] initState 호출");
     print("📋 [TodoListScreen] 초기 todos 개수: ${widget.todos.length}");
     print("📋 [TodoListScreen] 받은 onAddedToDo: ${widget.onAddedToDo}");
-    print("📋 [TodoListScreen] onAddedToDo 타입: ${widget.onAddedToDo.runtimeType}");
+    print(
+      "📋 [TodoListScreen] onAddedToDo 타입: ${widget.onAddedToDo.runtimeType}",
+    );
 
     if (widget.todos.isNotEmpty) {
       print("📋 [TodoListScreen] 초기 todos 내용:");
@@ -42,6 +49,13 @@ class _TodoListScreenState extends State<TodoListScreen> {
     } else {
       print("📋 [TodoListScreen] 초기 todos 리스트가 비어있음");
     }
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    widget._titleController.dispose(); // ⭐️ 컨트롤러 해제
   }
 
   @override
@@ -62,6 +76,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
           },
           icon: Icon(Icons.backspace_outlined),
         ),
+
         title: Text(
           "todos!",
           style: TextStyle(color: Colors.black12, fontSize: 20),
@@ -101,6 +116,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
         },
         child: Icon(Icons.add),
       ),
+
       body: Column(
         children: [
           // ⭐️ 할일 개수 표시 (디버깅 및 정보 제공)
@@ -108,10 +124,30 @@ class _TodoListScreenState extends State<TodoListScreen> {
             width: double.infinity,
             padding: EdgeInsets.all(16),
             color: Colors.red[100],
-            child: Text(
-              "할일 개수: ${widget.todos.length}",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(padding: EdgeInsets.only(left: 30)),
+                Text(
+                  "할일 개수: ${widget.todos.length}",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                IconButton(
+                  icon: widget.mode == "edit"
+                      ? Icon(Icons.mode_edit)
+                      : Icon(Icons.view_list),
+                  onPressed: () {
+                    setState(() {
+                      widget.mode == "edit"
+                          ? widget.mode = "view"
+                          : widget.mode = "edit";
+                    });
+                    print("모드 변경됨: ${widget.mode}");
+                  },
+                ),
+                // ⭐️ 아이콘: 현재 모드에 따라 아이콘 변경
+              ],
             ),
           ),
           // ⭐️ Expanded: 남은 공간을 모두 차지, ListView 등 스크롤 위젯에 필수
@@ -120,11 +156,25 @@ class _TodoListScreenState extends State<TodoListScreen> {
               // ⭐️ ListView.builder: 리스트를 효율적으로 생성, 스크롤 지원
               itemBuilder: (BuildContext context, int idx) {
                 Todo todo = widget.todos[idx];
+                String title = todo.title;
+                // ⭐️ TextEditingController: 텍스트 입력 필드의 컨트롤러, 상태 관리에 사용
                 return Card(
                   // ⭐️ Card: 각 할일을 카드 형태로 표시
                   child: Column(
                     children: [
-                      Text("할일명 : ${todo.title}"),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("할일 : "),
+                          SizedBox(width: 10),
+                          isInputText(
+                            widget.mode,
+                            widget._titleController,
+                            title,
+                            idx,
+                          ),
+                        ],
+                      ),
                       SizedBox(height: 10),
                       Text("카테고리 : ${todo.category}"),
                       SizedBox(height: 10),
@@ -159,6 +209,78 @@ class _TodoListScreenState extends State<TodoListScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget isInputText(
+    String mode,
+    TextEditingController controller,
+    String title,
+    int idx,
+  ) {
+    if (mode == "edit") {
+      // 수정 모드라면
+      return ElevatedButton(
+        // 버튼으로 시각적 강조를 해 수정 가능하도록 표시
+        onPressed: () {
+          // 클릭시
+          // ⭐️ 할일 수정 다이얼로그 표시
+          _showEditDialog(controller, title, idx);
+          print("할일 수정 버튼 클릭됨: $title");
+        },
+        child: Text(title),
+      );
+    } else if (mode == "view") {
+      return Text(
+        title,
+        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      );
+    } else {
+      return Text("모드 오류");
+    }
+  }
+
+  void _showEditDialog(
+    TextEditingController controller,
+    String title,
+    int idx,
+  ) {
+    showDialog(
+      // 알림창 표시
+      context: context, // 현재 위젯의 위치 정보
+      builder: (BuildContext context) {
+        // 빌더 함수로 다이얼로그 내용 정의
+        return AlertDialog(
+          // 알림창 위젯
+          title: Text("할일 수정"),
+          content: TextField(
+            // 텍스트 입력 필드
+            controller: controller, // 컨트롤러로 상태 관리
+            autofocus: true,
+            decoration: InputDecoration(hintText: "새 할일 입력"), // 힌트 텍스트
+          ),
+          actions: [
+            TextButton(
+              // 버튼 1: 수정
+              onPressed: () {
+                // 수정 버튼 클릭시
+                setState(() {
+                  // 상태 변경
+                  widget.todos[idx].title = controller.text; // 할일 제목 수정
+                });
+                Navigator.of(context).pop(); // 알림창 닫기
+              },
+              child: Text("수정"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // 취소 버튼 클릭시 알림창 닫기
+              },
+              child: Text("취소"),
+            ),
+          ],
+        );
+      },
     );
   }
 }

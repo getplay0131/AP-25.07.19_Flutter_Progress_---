@@ -169,24 +169,21 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
     print("🚀 [1단계] addTodo 함수: $addTodo");
 
     // ⭐️ 테스트용 더미 데이터 추가해보기
-    print("🧪 [테스트] 더미 데이터 추가 테스트");
-    todos.add(Todo(
-        id: "test_id",
-        title: "테스트 할일",
-        category: "테스트",
-        priority: "높음",
-        isCompleted: false
-    ));
-    print("🧪 [테스트] 더미 추가 후 todos 개수: ${todos.length}");
+    // print("🧪 [테스트] 더미 데이터 추가 테스트");
+    // todos.add(Todo(
+    //     id: "test_id",
+    //     title: "테스트 할일",
+    //     category: "테스트",
+    //     priority: "높음",
+    //     isCompleted: false
+    // ));
+    // print("🧪 [테스트] 더미 추가 후 todos 개수: ${todos.length}");
 
     Navigator.of(context).pushNamed(
       "/todoListScreen",
-      arguments: {
-        "todos": todos,
-        "onAddedToDo": addTodo,
-      },
+      arguments: {"todos": todos, "onAddedToDo": addTodo},
     );
-    print("🚀 [1단계] pushNamed 완료");// 디버깅용 출력
+    print("🚀 [1단계] pushNamed 완료"); // 디버깅용 출력
   }
 }
 

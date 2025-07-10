@@ -15,28 +15,19 @@ void main() {
         "/addTodoScreen": (context) =>
             AddTodoScreen(category: "", priority: ""),
         "/todoListScreen": (context) {
-          print("🔧 [2단계] routes - TodoListScreen 생성 시작");
-
-          final arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-          print("🔧 [2단계] arguments 전체: $arguments");
-          print("🔧 [2단계] arguments 타입: ${arguments.runtimeType}");
-          print("🔧 [2단계] arguments null 여부: ${arguments == null}");
-
-          if (arguments != null) {
-            print("🔧 [2단계] arguments 키들: ${arguments.keys}");
-            print("🔧 [2단계] todos 키 존재: ${arguments.containsKey('todos')}");
-            print("🔧 [2단계] todos 값: ${arguments['todos']}");
-            print("🔧 [2단계] todos 타입: ${arguments['todos'].runtimeType}");
-            print("🔧 [2단계] todos 길이: ${arguments['todos']?.length}");
-          } else {
-            print("❌ [2단계] arguments가 null입니다!");
-          }
+          final arguments =
+              ModalRoute.of(context)?.settings.arguments
+                  as Map<String, dynamic>?;
+          debugRouteArguments(arguments);
 
           return TodoListScreen(
             todos: arguments?['todos'] ?? [],
-            onAddedToDo: arguments?['onAddedToDo'] ?? (todo) {
-              print("❌ [2단계] 기본 콜백 실행 - 데이터 전달 실패!");
-            },
+            onAddedToDo:
+                arguments?['onAddedToDo'] ??
+                (todo) {
+                  print("❌ [2단계] 기본 콜백 실행 - 데이터 전달 실패!");
+                },
+            mode: arguments?['mode'] ?? "edit",
           );
         },
         "/dashBoardScreen": (context) => DashBoardScreen(),
@@ -54,4 +45,24 @@ void main() {
       },
     ),
   );
+}
+
+// ⭐️ 디버깅용 함수: arguments Map을 받아 상세 정보 출력, 확장성 고려
+void debugRouteArguments(Map<String, dynamic>? arguments) {
+  print("🔧 [디버깅] arguments 전체: $arguments");
+  print("🔧 [디버깅] arguments 타입: ${arguments.runtimeType}");
+  print("🔧 [디버깅] arguments null 여부: ${arguments == null}");
+
+  if (arguments != null) {
+    print("🔧 [디버깅] arguments 키들: ${arguments.keys}");
+    for (var key in arguments.keys) {
+      print("🔧 [디버깅] $key 값: ${arguments[key]}");
+      print("🔧 [디버깅] $key 타입: ${arguments[key]?.runtimeType}");
+      if (arguments[key] is List) {
+        print("🔧 [디버깅] $key 길이: ${(arguments[key] as List).length}");
+      }
+    }
+  } else {
+    print("❌ [디버깅] arguments가 null입니다!");
+  }
 }
